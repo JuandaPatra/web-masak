@@ -35,7 +35,8 @@ function CardResep({ resep }: CardResepProps) {
           <div className="flex">
             <div className=" w-24 h-24  mr-4 align-middle relative">
               <Image
-                src={"/thumbnail.png"}
+               unoptimized
+                src={`http://localhost:8000/storage/` +resep.image}
                 alt="Card Image"
                 width={100}
                 height={100}

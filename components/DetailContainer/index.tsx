@@ -2,7 +2,16 @@ import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { Rating, RatingButton } from "@/components/ui/shadcn-io/rating";
-function DetailContainer() {
+async function  DetailContainer({ slug }: { slug: string }) {
+
+
+  const res = await fetch(`http://localhost:8000/api/reseps/${slug}`, {
+    cache: "no-store",
+  });
+
+  const data = await res.json();
+  console.log("DetailContainer data:", data.data);
+  const resep = data.data;
   return (
     <>
       {/* <div
@@ -231,19 +240,23 @@ function DetailContainer() {
           {/* =================== KIRI: GAMBAR sticky =================== */}
           <div className="relative">
             <div className="sticky top-2">
+              <div className="absolute left-[50%] translate-x-[-50%]">
+
               <Image
-                src={"/thumbnail.png"}
+                unoptimized
+                src={`http://localhost:8000/storage/` +resep.image}
                 alt="Card Image"
                 width={200}
                 height={200}
-                className="object-cover object-center h-full w-full  rounded-xl mb-30"
+                className="object-cover object-center   rounded-xl mb-30"
               />
+              </div>
             </div>
           </div>
 
           {/* =================== KANAN: TEKS SCROLL PANJANG =================== */}
           <div className="w-full p-4 overflow-visible">
-            <h1 className="text-xl font-bold mb-4">RESEP TELUR BACEM</h1>
+            <h1 className="text-xl font-bold mb-4">{resep.title}</h1>
 
             <h2 className="font-semibold mb-2">Bahan</h2>
 

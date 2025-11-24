@@ -10,6 +10,9 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import SearchBar from "../SearchBar";
+import { get } from "http";
+import { da } from "zod/locales";
 
 type Resep = {
   id: number;
@@ -28,15 +31,18 @@ function MenuContainer() {
       const response = await fetch("http://localhost:8000/api/reseps");
       const data = await response.json();
       console.log(data);
-      setReseps(data.data);
-      setCurrentPage(data.current_page);
-      setLastPage(data.last_page);
+      if  (data.current_page !== currentPage) {
+        console.log("data ada");
+        setReseps(data.data);
+        setCurrentPage(data.current_page);
+        setLastPage(data.last_page);
+      }
     } catch (error) {
       console.error("Error fetching data:", error);
     }
   };
 
-  useEffect(() => {
+  useEffect( () => {
     fetch(`http://localhost:8000/api/reseps?page=${currentPage}`)
       .then((res) => res.json())
       .then((json) => {
@@ -47,6 +53,7 @@ function MenuContainer() {
           setCurrentPage(json.data.current_page);
         }
       });
+    
   }, [currentPage]);  
   return (
     <>
@@ -59,7 +66,8 @@ function MenuContainer() {
             xl:max-w-[1140px]
             2xl:max-w-[1320px]"
       >
-        <h2 className="text-3xl font-bold my-8 text-center">Menu Resep</h2>
+
+        <SearchBar />
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8"></div>
         {
           reseps.map((resep) => (
