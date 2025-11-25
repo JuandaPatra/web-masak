@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import CardResep from "../CardResep";
 import {
   Pagination,
@@ -11,8 +11,8 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import SearchBar from "../SearchBar";
-import { get } from "http";
-import { da } from "zod/locales";
+import { ResepSearchResponse } from "@/types/resep";
+import { useSearchParams, useRouter } from "next/navigation";
 
 type Resep = {
   id: number;
@@ -22,39 +22,82 @@ type Resep = {
   description: string;
   source: string;
 };
-function MenuContainer() {
-  const [reseps, setReseps] = useState<Resep[]>([]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [lastPage, setLastPage] = useState(1);
-  const getApiData = async () => {
-    try {
-      const response = await fetch("http://localhost:8000/api/reseps");
-      const data = await response.json();
-      console.log(data);
-      if  (data.current_page !== currentPage) {
-        console.log("data ada");
-        setReseps(data.data);
-        setCurrentPage(data.current_page);
-        setLastPage(data.last_page);
-      }
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    }
-  };
 
-  useEffect( () => {
-    fetch(`http://localhost:8000/api/reseps?page=${currentPage}`)
-      .then((res) => res.json())
-      .then((json) => {
+function MenuContainer() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
+  // Ambil nilai awal dari URL (page & search)
+  const initialPage = Number(searchParams.get("page")) || 1;
+  const initialSearch = searchParams.get("search") || "";
+
+  const [search, setSearch] = useState(initialSearch);
+
+  // Flag agar tidak update URL saat initial load
+  const isFirstRender = useRef(true);
+
+  const [reseps, setReseps] = useState<Resep[]>([]);
+  const [currentPage, setCurrentPage] = useState(initialPage);
+  const [lastPage, setLastPage] = useState(1);
+
+
+
+  // ======================================================
+  // 1️⃣ Fetch berdasarkan page & search
+  // ======================================================
+  useEffect(() => {
+    const controller = new AbortController();
+
+    const fetchData = async () => {
+      try {
+        const url = new URL("http://localhost:8000/api/reseps");
+        url.searchParams.set("page", String(currentPage));
+        if (search) url.searchParams.set("search", search);
+
+        const res = await fetch(url.toString(), {
+          signal: controller.signal,
+        });
+
+        const json = await res.json();
+
         setReseps(json.data.data);
         setLastPage(json.data.last_page);
-        // Hanya set currentPage jika berbeda
-        if (json.data.current_page !== currentPage) {
-          setCurrentPage(json.data.current_page);
-        }
-      });
-    
-  }, [currentPage]);  
+      } catch (err) {
+        if (err instanceof DOMException) return; // ignore abort
+        console.error("Fetch error:", err);
+      }
+    };
+
+    fetchData();
+
+    return () => controller.abort();
+  }, [currentPage, search]);
+
+  // ======================================================
+  // 2️⃣ Update URL setiap page/search berubah (AMAN)
+  // ======================================================
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return; // skip initial
+    }
+
+    const params = new URLSearchParams();
+
+    params.set("page", String(currentPage));
+    if (search) params.set("search", search);
+
+    router.replace(`?${params.toString()}`, { scroll: false });
+  }, [currentPage, search]);
+
+
+  const handleSearchResult = (results: ResepSearchResponse) => {
+    console.log("Search results in MenuContainer:", results);
+    setReseps(results.data);
+    setCurrentPage(results.current_page);
+    if (results.last_page) setLastPage(results.last_page);
+    setCurrentPage(1); // reset ke page 1 setelah search
+  };
   return (
     <>
       <div
@@ -66,41 +109,36 @@ function MenuContainer() {
             xl:max-w-[1140px]
             2xl:max-w-[1320px]"
       >
-
-        <SearchBar />
+        <SearchBar onSearchResult={handleSearchResult} />
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8"></div>
-        {
-          reseps.map((resep) => (
-            <CardResep resep={resep}  key={resep.id} />
-          ))
-        }
-
-
+        {reseps.map((resep) => (
+          <CardResep resep={resep} key={resep.id} />
+        ))}
 
         <Pagination>
           <PaginationContent>
             <PaginationItem>
               <PaginationPrevious href="#" />
             </PaginationItem>
-            {
-              currentPage > 2 && (
-                <PaginationItem>
-                  <PaginationLink href="#">...</PaginationLink>
-                </PaginationItem>
-              )
-            }
+            {currentPage > 2 && (
+              <PaginationItem>
+                <PaginationLink href="#">...</PaginationLink>
+              </PaginationItem>
+            )}
             {Array.from({ length: lastPage }).map((_, index) => (
               <PaginationItem key={index}>
                 <PaginationLink
                   href="#"
                   onClick={() => setCurrentPage(index + 1)}
-                  className={currentPage === index + 1 ? "bg-blue-500 text-white" : ""}
+                  className={
+                    currentPage === index + 1 ? "bg-blue-500 text-white" : ""
+                  }
                 >
                   {index + 1}
                 </PaginationLink>
               </PaginationItem>
             ))}
-            
+
             {/* <PaginationItem>
               <PaginationLink href="2">1</PaginationLink>
             </PaginationItem>
