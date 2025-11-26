@@ -10,7 +10,6 @@ async function  DetailContainer({ slug }: { slug: string }) {
   });
 
   const data = await res.json();
-  console.log("DetailContainer data:", data.data);
   const resep = data.data;
   return (
     <>

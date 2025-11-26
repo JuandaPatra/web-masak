@@ -27,7 +27,7 @@ type CardResepProps = {
 };
 
 function CardResep({ resep }: CardResepProps) {
-  console.log(resep);
+  // console.log(resep);
   return (
     <>
       <Card className="mb-3 rounded-4xl shadow-2xl">
@@ -35,8 +35,8 @@ function CardResep({ resep }: CardResepProps) {
           <div className="flex">
             <div className=" w-24 h-24  mr-4 align-middle relative">
               <Image
-               unoptimized
-                src={`http://localhost:8000/storage/` +resep.image}
+                unoptimized
+                src={`http://localhost:8000/storage/` + resep.image}
                 alt="Card Image"
                 width={100}
                 height={100}
@@ -44,10 +44,10 @@ function CardResep({ resep }: CardResepProps) {
               />
             </div>
             <div className=" w-full">
-              <h3 className="text-lg font-semibold mb-2">{resep.title}</h3>
-              <p className="text-sm text-gray-600">
-                {resep.description}
-              </p>
+              <Link href={`detail/${resep.slug}`}>
+                <h3 className="text-lg font-semibold mb-2">{resep.title}</h3>
+              </Link>
+              <p className="text-sm text-gray-600">{resep.description}</p>
               <div className="flex flex-wrap mt-4 mb-4">
                 <div className="w-1/2 my-2">
                   <div className="flex flex-col ">
@@ -66,9 +66,9 @@ function CardResep({ resep }: CardResepProps) {
                     <span className="text-xs text-muted-foreground">
                       Easy to cook{" "}
                     </span>
-                    <Rating defaultValue={5} readOnly >
+                    <Rating defaultValue={5} readOnly>
                       {Array.from({ length: 5 }).map((_, index) => (
-                        <RatingButton key={index}  />
+                        <RatingButton key={index} />
                       ))}
                     </Rating>
                   </div>
