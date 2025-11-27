@@ -24,6 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useRouter } from "next/navigation"
 
 // import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
@@ -32,6 +33,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Toaster } from "../ui/sonner";
+import Link from "next/link";
 
 const initialValue = {
   root: {
@@ -74,6 +76,7 @@ const formSchema = z.object({
 });
 
 function TambahResepContainer() {
+  const router = useRouter()
   const [editorState, setEditorState] =
     useState<SerializedEditorState>(initialValue);
   const form = useForm<z.infer<typeof formSchema>>({
@@ -95,7 +98,7 @@ function TambahResepContainer() {
     formData.append("description", values.deskripsi);
     formData.append("image", values.foto);
     formData.append("source", values.sumber);
-    formData.append("ingredients", values.resep);
+    formData.append("ingredients", JSON.stringify(values.resep) );
 
     try {
       const response = await fetch("http://localhost:8000/api/reseps", {
@@ -109,6 +112,9 @@ function TambahResepContainer() {
         console.log("Success:", json.data);
 
         toast.success(json.meta?.message || "Resep berhasil ditambahkan!");
+        setTimeout(()=>{
+          router.push('/')
+        }, 2000)
       }
     } catch (error) {
       console.error("Error:", error);
