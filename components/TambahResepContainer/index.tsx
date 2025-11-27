@@ -64,6 +64,7 @@ const initialValue = {
     version: 1,
   },
 } as unknown as SerializedEditorState;
+import { lexicalToHtml} from "@/app/utils/richToHtml"
 
 const formSchema = z.object({
   nama: z.string().min(1, "Wajib diisi"),
@@ -98,7 +99,9 @@ function TambahResepContainer() {
     formData.append("description", values.deskripsi);
     formData.append("image", values.foto);
     formData.append("source", values.sumber);
-    formData.append("ingredients", JSON.stringify(values.resep) );
+    const htmlContent = lexicalToHtml(values.resep.root);
+    console.log(htmlContent)
+    formData.append("ingredients", htmlContent );
 
     try {
       const response = await fetch("http://localhost:8000/api/reseps", {

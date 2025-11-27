@@ -11,6 +11,7 @@ async function  DetailContainer({ slug }: { slug: string }) {
 
   const data = await res.json();
   const resep = data.data;
+  console.log(resep);
   console.log(JSON.stringify(resep.ingredients) )
   return (
     <>
