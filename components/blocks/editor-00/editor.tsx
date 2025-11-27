@@ -18,9 +18,7 @@ import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin"
 import { HeadingNode, QuoteNode } from "@lexical/rich-text"
 import { ParagraphNode, TextNode } from "lexical"
 
-import { ContentEditable } from "@/registry/new-york-v4/editor/editor-ui/content-editable"
-import { FontSizeToolbarPlugin } from "@/registry/new-york-v4/editor/plugins/toolbar/font-size-toolbar-plugin"
-import { ToolbarPlugin } from "@/registry/new-york-v4/editor/plugins/toolbar/toolbar-plugin"
+
 
 const editorConfig: InitialConfigType = {
   namespace: "Editor",
